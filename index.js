@@ -3,11 +3,29 @@ const { ActionRowBuilder, ButtonBuilder, ButtonStyle, ModalBuilder, TextInputBui
 const sendLog = require('./Events/sendlog');
 const config = require('./config.json');
 const { GiveawaysManager } = require('discord-giveaways');
-const bot = new Discord.Client({ intents: 3276799, partials: [Discord.Partials.Channel, Discord.Partials.Message, Discord.Partials.User, Discord.Partials.GuildMember, Discord.Partials.Reaction, Discord.Partials.ThreadMember, Discord.Partials.GuildScheduledEvent] });
+
+const bot = new Discord.Client({ 
+  intents: 3276799, 
+  partials: [
+    Discord.Partials.Channel, 
+    Discord.Partials.Message, 
+    Discord.Partials.User, 
+    Discord.Partials.GuildMember, 
+    Discord.Partials.Reaction, 
+    Discord.Partials.ThreadMember, 
+    Discord.Partials.GuildScheduledEvent
+  ] 
+});
+
 bot.commands = new Discord.Collection();
 bot.slashCommands = new Discord.Collection();
 bot.setMaxListeners(70);
-bot.login(require('./config.json').token).then(() => { console.log(`[INFO] > ${bot.user.tag} est connecté`); }).catch(() => { console.log('\x1b[31m[!] — Please configure a valid bot token\x1b[0m'); });
+
+// ✅ Ligne modifiée pour utiliser la variable d'environnement
+bot.login(process.env.TOKEN)
+  .then(() => { console.log(`[INFO] > ${bot.user.tag} est connecté`); })
+  .catch(() => { console.log('\x1b[31m[!] — Please configure a valid bot token\x1b[0m'); });
+
 bot.giveawaysManager = new GiveawaysManager(bot, {
   storage: './giveaways.json',
   updateCountdownEvery: 5000,
@@ -17,6 +35,7 @@ bot.giveawaysManager = new GiveawaysManager(bot, {
     reaction: "🎉"
   }
 });
+
 bot.giveawaysManager.on('giveawayEnded', async (giveaway, winners) => {
   try {
     const channel = await bot.channels.fetch(giveaway.channelId);
@@ -44,6 +63,7 @@ bot.giveawaysManager.on('giveawayEnded', async (giveaway, winners) => {
     console.error("Impossible de modifier l'embed:", error);
   }
 });
+
 const commandHandler = require('./Handler/Commands.js')(bot);
 const slashcommandHandler = require('./Handler/slashCommands.js')(bot);
 const eventdHandler = require('./Handler/Events')(bot);

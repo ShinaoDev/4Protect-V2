@@ -1,3 +1,12 @@
+// ==================== Serveur Express pour rester actif ====================
+const express = require('express');
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+app.get('/', (req, res) => res.send('Bot actif !'));
+app.listen(PORT, () => console.log(`Serveur actif sur le port ${PORT}`));
+
+// ==================== Discord ====================
 const Discord = require('discord.js');
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle, ModalBuilder, TextInputBuilder, TextInputStyle, EmbedBuilder } = require('discord.js');
 const sendLog = require('./Events/sendlog');
@@ -21,11 +30,12 @@ bot.commands = new Discord.Collection();
 bot.slashCommands = new Discord.Collection();
 bot.setMaxListeners(70);
 
-// ✅ Ligne modifiée pour utiliser la variable d'environnement
+// ==================== Connexion ====================
 bot.login(process.env.TOKEN)
-  .then(() => { console.log(`[INFO] > ${bot.user.tag} est connecté`); })
-  .catch(() => { console.log('\x1b[31m[!] — Please configure a valid bot token\x1b[0m'); });
+  .then(() => console.log(`[INFO] > ${bot.user.tag} est connecté`))
+  .catch(() => console.log('\x1b[31m[!] — Please configure a valid bot token\x1b[0m'));
 
+// ==================== Giveaways ====================
 bot.giveawaysManager = new GiveawaysManager(bot, {
   storage: './giveaways.json',
   updateCountdownEvery: 5000,
@@ -64,6 +74,40 @@ bot.giveawaysManager.on('giveawayEnded', async (giveaway, winners) => {
   }
 });
 
+// ==================== Commandes messages avec préfixe ====================
+const PREFIX = '+';
+
+bot.on('messageCreate', message => {
+  if (message.author.bot) return;
+  if (!message.content.startsWith(PREFIX)) return;
+
+  const args = message.content.slice(PREFIX.length).trim().split(/ +/);
+  const command = args.shift().toLowerCase();
+
+  // Exemple de commande
+  if (command === 'ping') {
+    message.reply('Pong !');
+  }
+
+  // Tu peux ajouter tes autres commandes +warn, +kick, etc.
+});
+
+// ==================== Slash commands ====================
+bot.on('interactionCreate', async interaction => {
+  if (!interaction.isChatInputCommand()) return;
+
+  const cmd = bot.slashCommands.get(interaction.commandName);
+  if (!cmd) return;
+
+  try {
+    await cmd.execute(interaction, bot);
+  } catch (error) {
+    console.error(error);
+    await interaction.reply({ content: 'Une erreur est survenue !', ephemeral: true });
+  }
+});
+
+// ==================== Handlers ====================
 const commandHandler = require('./Handler/Commands.js')(bot);
 const slashcommandHandler = require('./Handler/slashCommands.js')(bot);
 const eventdHandler = require('./Handler/Events')(bot);

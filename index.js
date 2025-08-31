@@ -1,11 +1,3 @@
-// ==================== Serveur Express pour rester actif ====================
-const express = require('express');
-const app = express();
-const PORT = process.env.PORT || 3000;
-
-app.get('/', (req, res) => res.send('Bot actif !'));
-app.listen(PORT, () => console.log(`Serveur actif sur le port ${PORT}`));
-
 // ==================== Discord ====================
 const Discord = require('discord.js');
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle, ModalBuilder, TextInputBuilder, TextInputStyle, EmbedBuilder } = require('discord.js');
@@ -89,7 +81,7 @@ bot.on('messageCreate', message => {
     message.reply('Pong !');
   }
 
-  // Tu peux ajouter tes autres commandes +warn, +kick, etc.
+  // Ici tu peux ajouter tes autres commandes +warn, +kick, +ban…
 });
 
 // ==================== Slash commands ====================
